@@ -24,10 +24,8 @@ $settings = $policy | ConvertFrom-Json
 function save() {
  $settings."*".runtime_blocked_hosts = $hosts 
  $json = ConvertTo-Json $settings -Compress
- Set-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome" -Name "ExtensionSettings" -Value $json
-}
-
-
+ [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Google\Chrome", "ExtensionSettings", $json)
+ [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Microsoft\Edge", "ExtensionSettings", $json)
 
 $Menu = [ordered]@{
  1 = 'Protect a domain'
