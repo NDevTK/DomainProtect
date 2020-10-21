@@ -112,7 +112,7 @@ if($Result.Name -eq 6) {
 }
 
 if($Result.Name -eq 7) {
- $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for a global policy", "DomainProtect");
+ $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for the global policy", "DomainProtect");
  setScope $data
  menu
 }
