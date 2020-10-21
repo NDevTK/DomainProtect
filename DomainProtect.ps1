@@ -1,3 +1,4 @@
+# Used for the InputBox
 [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
 
 # Self-elevate the script if required
