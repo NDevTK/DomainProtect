@@ -9,4 +9,4 @@ Currently supported browsers: Chrome, Edge, Brave
 Run Set-ExecutionPolicy RemoteSigned in powershell as admin
 
 # Why powershell?
-Because its already instaled for devices running windows and the code is easily viewable.
+Because its already installed for devices running windows and the code is easily viewable.
