@@ -22,17 +22,18 @@ $settings | add-member -MemberType NoteProperty -Name "*" -value (New-object pso
 
 
 function createList($name) {
-if ($settings."*".$name -ne $null) {
+if ($settings."*".PSObject.Properties.Match($name).Count) {
 # Convert to ArrayList
 $settings."*".$name = [System.Collections.ArrayList]$settings."*".$name
 } else {
 # Create empty ArrayList
+$settings."*".$name
 $settings."*" | add-member -MemberType NoteProperty -Name $name -value (New-object System.Collections.Arraylist)
 }
 }
 
-createList("runtime_blocked_hosts")
-createList("blocked_permissions")
+createList "runtime_blocked_hosts"
+createList "blocked_permissions"
 
 function save() {
  $json = ConvertTo-Json $settings -Compress
