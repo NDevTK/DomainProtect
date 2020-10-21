@@ -23,7 +23,6 @@ if ($settings.$scope.PSObject.Properties.Match($name).Count) {
 $settings.$scope.$name = [System.Collections.ArrayList]$settings.$scope.$name
 } else {
 # Create empty ArrayList
-$settings.$scope.$name
 $settings.$scope | add-member -MemberType NoteProperty -Name $name -value (New-object System.Collections.Arraylist)
 }
 }
