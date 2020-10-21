@@ -11,18 +11,24 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 $item = Get-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome" -Name "ExtensionSettings" -ErrorAction SilentlyContinue
 
-if($item) {
-$policy = $item.ExtensionSettings
+if ($item) {
+$settings = $item.ExtensionSettings | ConvertFrom-Json
 } else {
-$policy = '{"*":{"runtime_blocked_hosts":[]}}'
+$settings = New-Object psobject
 }
 
-$settings = $policy | ConvertFrom-Json
+# Create if needed
+$settings | add-member -MemberType NoteProperty -Name "*" -value (New-object psobject)  -ErrorAction SilentlyContinue
 
-[System.Collections.ArrayList]$hosts = $settings."*".runtime_blocked_hosts
+if ($settings."*".runtime_blocked_hosts -ne $null) {
+# Convert runtime_blocked_hosts to an ArrayList
+$settings."*".runtime_blocked_hosts = [System.Collections.ArrayList]$settings."*".runtime_blocked_hosts
+} else {
+# Create empty ArrayList
+$settings."*" | add-member -MemberType NoteProperty -Name "runtime_blocked_hosts" -value (New-object System.Collections.Arraylist)
+}
 
 function save() {
- $settings."*".runtime_blocked_hosts = $hosts 
  $json = ConvertTo-Json $settings -Compress
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Google\Chrome", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Microsoft\Edge", "ExtensionSettings", $json)
@@ -39,17 +45,17 @@ $Result = $Menu | Out-GridView -PassThru  -Title 'What to do?'
 
 if ($Result.Name -eq 1) {
  $domain = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the domain to protect like https://*.youtube.com", "DomainProtect");
- if(!$hosts.Contains($domain)) {
-  $hosts.Add($domain)
+ if(!$settings."*".runtime_blocked_hosts.Contains($domain)) {
+  $settings."*".runtime_blocked_hosts.Add($domain)
   save
  }
  menu
 }
 
 if ($Result.Name -eq 2) {
- $remove =  $hosts | Out-GridView -PassThru  -Title 'What to remove?'
+ $remove =  $settings."*".runtime_blocked_hosts | Out-GridView -PassThru  -Title 'What to remove?'
  if(!$null -eq $remove) {
-  $hosts.Remove($remove)
+  $settings."*".runtime_blocked_hosts.Remove($remove)
   save
  }
  menu
