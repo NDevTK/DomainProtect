@@ -58,8 +58,8 @@ function save() {
 $Menu = [ordered]@{
  1 = 'Protect a domain'
  2 = 'Remove domain protection'
- 3 = 'Deny a permission'
- 4 = 'Allow a permission'
+ 3 = 'Block a permission'
+ 4 = 'Unblock a permission'
  5 = 'Add a allowed domain'
  6 = 'Remove a allowed domain'
  7 = 'Change scope'
