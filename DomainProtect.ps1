@@ -20,13 +20,19 @@ $settings = New-Object psobject
 # Create if needed
 $settings | add-member -MemberType NoteProperty -Name "*" -value (New-object psobject)  -ErrorAction SilentlyContinue
 
-if ($settings."*".runtime_blocked_hosts -ne $null) {
-# Convert runtime_blocked_hosts to an ArrayList
-$settings."*".runtime_blocked_hosts = [System.Collections.ArrayList]$settings."*".runtime_blocked_hosts
+
+function createList($name) {
+if ($settings."*".$name -ne $null) {
+# Convert to ArrayList
+$settings."*".$name = [System.Collections.ArrayList]$settings."*".$name
 } else {
 # Create empty ArrayList
-$settings."*" | add-member -MemberType NoteProperty -Name "runtime_blocked_hosts" -value (New-object System.Collections.Arraylist)
+$settings."*" | add-member -MemberType NoteProperty -Name $name -value (New-object System.Collections.Arraylist)
 }
+}
+
+createList("runtime_blocked_hosts")
+createList("blocked_permissions")
 
 function save() {
  $json = ConvertTo-Json $settings -Compress
@@ -38,27 +44,46 @@ function save() {
 $Menu = [ordered]@{
  1 = 'Protect a domain'
  2 = 'Remove a domain'
+ 3 = 'Deny a permission'
+ 4 = 'Allow a permission'
+}
+
+
+function add($name, $message) {
+ $data = [Microsoft.VisualBasic.Interaction]::InputBox($message, "DomainProtect");
+ if(!$null -eq $data -And !$settings."*".$name.Contains($data)) {
+  $settings."*".$name.Add($data)
+  save
+ }
+ menu
+}
+
+function remove($name) {
+ $remove =  $settings."*".$name | Out-GridView -PassThru  -Title 'What to remove?'
+ if(!$null -eq $remove) {
+  $settings."*".$name.Remove($remove)
+  save
+ }
+ menu
 }
 
 function menu() {
 $Result = $Menu | Out-GridView -PassThru  -Title 'What to do?'
 
 if ($Result.Name -eq 1) {
- $domain = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the domain to protect like https://*.youtube.com", "DomainProtect");
- if(!$settings."*".runtime_blocked_hosts.Contains($domain)) {
-  $settings."*".runtime_blocked_hosts.Add($domain)
-  save
- }
- menu
+ add "runtime_blocked_hosts" "Enter the domain to protect like https://*.youtube.com"
 }
 
 if ($Result.Name -eq 2) {
- $remove =  $settings."*".runtime_blocked_hosts | Out-GridView -PassThru  -Title 'What to remove?'
- if(!$null -eq $remove) {
-  $settings."*".runtime_blocked_hosts.Remove($remove)
-  save
- }
- menu
+ remove "runtime_blocked_hosts"
+}
+
+if ($Result.Name -eq 3) {
+ add "blocked_permissions" "Enter the permission to block like unlimitedStorage"
+}
+
+if ($Result.Name -eq 4) {
+ remove "blocked_permissions"
 }
 
 }
