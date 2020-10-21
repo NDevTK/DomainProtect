@@ -7,3 +7,6 @@ Currently supported browsers: Chrome, Edge, Brave
 
 # How to fix “execution of scripts is disabled on this system.”
 Run Set-ExecutionPolicy RemoteSigned in powershell as admin
+
+# Why powershell?
+Because its already instaled for devices running windows and the code is easily viewable.
