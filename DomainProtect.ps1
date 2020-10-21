@@ -17,26 +17,39 @@ $settings = $item.ExtensionSettings | ConvertFrom-Json
 $settings = New-Object psobject
 }
 
-# Create if needed
-$settings | add-member -MemberType NoteProperty -Name "*" -value (New-object psobject)  -ErrorAction SilentlyContinue
-
-
 function createList($name) {
-if ($settings."*".PSObject.Properties.Match($name).Count) {
+if ($settings.$scope.PSObject.Properties.Match($name).Count) {
 # Convert to ArrayList
-$settings."*".$name = [System.Collections.ArrayList]$settings."*".$name
+$settings.$scope.$name = [System.Collections.ArrayList]$settings.$scope.$name
 } else {
 # Create empty ArrayList
-$settings."*".$name
-$settings."*" | add-member -MemberType NoteProperty -Name $name -value (New-object System.Collections.Arraylist)
+$settings.$scope.$name
+$settings.$scope | add-member -MemberType NoteProperty -Name $name -value (New-object System.Collections.Arraylist)
 }
 }
 
+function createLists() {
 createList "runtime_blocked_hosts"
 createList "blocked_permissions"
+createList "runtime_allowed_hosts"
+}
+
+function setScope($data) {
+if($data -eq "*" -or $data.length -eq 32) {
+# Create if needed
+$settings | add-member -MemberType NoteProperty -Name $data -value (New-object psobject)  -ErrorAction SilentlyContinue
+$global:scope = $data
+createLists
+}
+}
+
+# Apply global scope
+setScope "*"
+
 
 function save() {
  $json = ConvertTo-Json $settings -Compress
+ Write-Output $json
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Google\Chrome", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Microsoft\Edge", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\BraveSoftware\Brave", "ExtensionSettings", $json)
@@ -44,25 +57,28 @@ function save() {
 
 $Menu = [ordered]@{
  1 = 'Protect a domain'
- 2 = 'Remove a domain'
+ 2 = 'Remove domain protection'
  3 = 'Deny a permission'
  4 = 'Allow a permission'
+ 5 = 'Add a allowed domain'
+ 6 = 'Remove a allowed domain'
+ 7 = 'Change scope'
 }
 
 
 function add($name, $message) {
  $data = [Microsoft.VisualBasic.Interaction]::InputBox($message, "DomainProtect");
- if(!$null -eq $data -And !$settings."*".$name.Contains($data)) {
-  $settings."*".$name.Add($data)
+ if(!$null -eq $data -or !$settings.$scope.$name.Contains($data)) {
+  $settings.$scope.$name.Add($data)
   save
  }
  menu
 }
 
 function remove($name) {
- $remove =  $settings."*".$name | Out-GridView -PassThru  -Title 'What to remove?'
+ $remove =  $settings.$scope.$name | Out-GridView -PassThru  -Title 'What to remove?'
  if(!$null -eq $remove) {
-  $settings."*".$name.Remove($remove)
+  $settings.$scope.$name.Remove($remove)
   save
  }
  menu
@@ -85,6 +101,20 @@ if ($Result.Name -eq 3) {
 
 if ($Result.Name -eq 4) {
  remove "blocked_permissions"
+}
+
+if($Result.Name -eq 5) {
+ add "runtime_allowed_hosts" "Enter the domain to allow like https://*.youtube.com"
+}
+
+if($Result.Name -eq 6) {
+ remove "runtime_allowed_hosts"
+}
+
+if($Result.Name -eq 7) {
+ $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for a global policy", "DomainProtect");
+ setScope $data
+ menu
 }
 
 }
