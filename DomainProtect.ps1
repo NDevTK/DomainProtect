@@ -17,7 +17,6 @@ $settings = $item.ExtensionSettings | ConvertFrom-Json
 } else {
 $settings = New-Object psobject
 }
-$firefox_settings = New-Object psobject
 
 
 function createList($name) {
@@ -32,11 +31,6 @@ $settings.$scope | add-member -MemberType NoteProperty -Name $name -value (New-o
 
 function createLists() {
 createList "runtime_blocked_hosts"
-
-if(!$firefox_settings.$scope.PSObject.Properties.Match("restricted_domains").Count) {
-$firefox_settings.$scope | add-member -MemberType NoteProperty -Name "restricted_domains" -value $settings.$scope.runtime_blocked_hosts
-}
-
 createList "blocked_permissions"
 createList "runtime_allowed_hosts"
 }
@@ -45,7 +39,6 @@ function setScope($data) {
 if($data -eq "*" -or $data.length -eq 32) {
 # Create if needed
 $settings | add-member -MemberType NoteProperty -Name $data -value (New-object psobject)  -ErrorAction SilentlyContinue
-$firefox_settings | add-member -MemberType NoteProperty -Name $data -value (New-object psobject)  -ErrorAction SilentlyContinue
 $global:scope = $data
 createLists
 }
@@ -58,8 +51,6 @@ setScope "*"
 function save() {
  $json = ConvertTo-Json $settings -Compress
  Write-Output $json
- $firefox_settings.$scope.restricted_domains = $settings.$scope.runtime_blocked_hosts
- $json2 = ConvertTo-Json $firefox_settings -Compress
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Google\Chrome", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Microsoft\Edge", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\BraveSoftware\Brave", "ExtensionSettings", $json)
