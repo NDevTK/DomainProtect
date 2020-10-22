@@ -56,7 +56,6 @@ function save() {
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\BraveSoftware\Brave", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Vivaldi", "ExtensionSettings", $json)
  [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Chromium", "ExtensionSettings", $json)
- [microsoft.win32.registry]::SetValue("HKEY_CURRENT_USER\Software\Policies\Mozilla\Firefox", "ExtensionSettings", $json2)
 }
 
 $Menu = [ordered]@{
