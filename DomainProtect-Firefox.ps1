@@ -59,13 +59,19 @@ $Menu = [ordered]@{
 }
 
 
-function add($name, $message) {
+function add($name, $message, $regex = "^[a-zA-Z0-9-]*\.[a-zA-Z0-9-.]*$") {
  $data = [Microsoft.VisualBasic.Interaction]::InputBox($message, "DomainProtect");
- if(!$null -eq $data -and !$settings.$scope.$name.Contains($data) -and $data.length -gt 1) {
+ if($null -eq $data) {
+  return
+ }
+ if($data.length -lt 1 -or !$regex -eq $false -and $data -notmatch $regex) {
+  [Microsoft.VisualBasic.Interaction]::MsgBox("Invalid format. changes where not saved", "OKOnly", "DomainProtect")
+  return
+ }
+ if(!$settings.$scope.$name.Contains($data) ) {
   $settings.$scope.$name.Add($data)
   save
  }
- menu
 }
 
 function remove($name) {
@@ -74,26 +80,23 @@ function remove($name) {
   $settings.$scope.$name.Remove($remove)
   save
  }
- menu
 }
 
 function menu() {
 $Result = $Menu | Out-GridView -PassThru  -Title 'What to do?'
 
-if ($Result.Name -eq 1) {
- add "restricted_domains" "Enter the domain name to protect like www.youtube.com"
+Switch($Result.Name) {
+ "1" {add "restricted_domains" "Enter the domain name to protect like www.youtube.com"}
+ "2" {remove "restricted_domains"}
+ "3" {
+  $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for the global policy", "DomainProtect");
+  setScope $data
+ }
+ $null {
+  Exit
+ }
 }
-
-if ($Result.Name -eq 2) {
- remove "restricted_domains"
-}
-
-if($Result.Name -eq 3) {
- $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for the global policy", "DomainProtect");
- setScope $data
- menu
-}
-
+menu
 }
 
 # Load menu for first time
