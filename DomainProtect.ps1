@@ -69,13 +69,19 @@ $Menu = [ordered]@{
 }
 
 
-function add($name, $message) {
+function add($name, $message, $regex = "^['*'|'http'|'https'|'file'|'ftp']*:\/\/[a-zA-Z0-9-.*]*$") {
  $data = [Microsoft.VisualBasic.Interaction]::InputBox($message, "DomainProtect");
- if(!$null -eq $data -and !$settings.$scope.$name.Contains($data) -and $data.length -gt 1) {
+ if($null -eq $data) {
+  return
+ }
+ if($data.length -lt 1 -or !$regex -eq $false -and $data -notmatch $regex) {
+  [Microsoft.VisualBasic.Interaction]::MsgBox("Invalid format. changes where not saved", "OKOnly", "DomainProtect")
+  return
+ }
+ if(!$settings.$scope.$name.Contains($data) ) {
   $settings.$scope.$name.Add($data)
   save
  }
- menu
 }
 
 function remove($name) {
@@ -84,42 +90,28 @@ function remove($name) {
   $settings.$scope.$name.Remove($remove)
   save
  }
- menu
 }
 
 function menu() {
 $Result = $Menu | Out-GridView -PassThru  -Title 'What to do?'
 
-if ($Result.Name -eq 1) {
- add "runtime_blocked_hosts" "Enter the domain to protect like https://*.youtube.com"
+Switch($Result.Name) {
+ "1" {add "runtime_blocked_hosts" "Enter the domain to protect like https://*.youtube.com"}
+ "2" {remove "runtime_blocked_hosts"}
+ "3" {add "blocked_permissions" "Enter the permission to block like unlimitedStorage" $false}
+ "4" {remove "blocked_permissions"}
+ "5" {add "runtime_allowed_hosts" "Enter the domain to allow like https://*.youtube.com"}
+ "6" {remove "runtime_allowed_hosts"}
+ "7" {
+  $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for the global policy", "DomainProtect");
+  setScope $data
+ }
+ $null {
+  Exit
+ }
 }
 
-if ($Result.Name -eq 2) {
- remove "runtime_blocked_hosts"
-}
-
-if ($Result.Name -eq 3) {
- add "blocked_permissions" "Enter the permission to block like unlimitedStorage"
-}
-
-if ($Result.Name -eq 4) {
- remove "blocked_permissions"
-}
-
-if($Result.Name -eq 5) {
- add "runtime_allowed_hosts" "Enter the domain to allow like https://*.youtube.com"
-}
-
-if($Result.Name -eq 6) {
- remove "runtime_allowed_hosts"
-}
-
-if($Result.Name -eq 7) {
- $data = [Microsoft.VisualBasic.Interaction]::InputBox("What scope? this can be a extension id or * for the global policy", "DomainProtect");
- setScope $data
- menu
-}
-
+menu
 }
 
 # Load menu for first time
