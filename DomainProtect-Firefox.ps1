@@ -34,10 +34,12 @@ createList "restricted_domains"
 }
 
 function setScope($data) {
+if($data -eq "*" -or $data.length -gt 1) {
 # Create if needed
 $settings | add-member -MemberType NoteProperty -Name $data -value (New-object psobject)  -ErrorAction SilentlyContinue
 $global:scope = $data
 createLists
+}
 }
 
 # Apply global scope
