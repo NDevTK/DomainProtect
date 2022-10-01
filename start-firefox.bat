@@ -1,1 +1,1 @@
-PowerShell.exe -ExecutionPolicy Bypass -File DomainProtect.ps1
+PowerShell.exe -ExecutionPolicy Bypass -File DomainProtect-Firefox.ps1
