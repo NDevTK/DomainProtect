@@ -98,7 +98,7 @@ $Result = $Menu | Out-GridView -PassThru  -Title 'What to do?'
 Switch($Result.Name) {
  "1" {add "runtime_blocked_hosts" "Enter the domain to protect like https://*.youtube.com"}
  "2" {remove "runtime_blocked_hosts"}
- "3" {add "blocked_permissions" "Enter the permission to block like unlimitedStorage" $false}
+ "3" {add "blocked_permissions" "Enter the permission to block like debugger" $false}
  "4" {remove "blocked_permissions"}
  "5" {add "runtime_allowed_hosts" "Enter the domain to allow like https://*.youtube.com"}
  "6" {remove "runtime_allowed_hosts"}
