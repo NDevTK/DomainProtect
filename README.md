@@ -1,6 +1,6 @@
 # DomainProtect
 Protect domains from malicious browser extensions.  
-Works by blacklisting extensions for chosen domains (also supports per extension scope) :D  
+Works by denylisting extensions for chosen domains (also supports per extension scope) :D  
 This is to prevent permission abuse like https://chris.partridge.tech/2020/extensions-the-next-generation-of-malware/help-for-users/  
 Check to see if its working by going to chrome://policy/ (reload if needed)  
 Currently supported browsers: Chrome, Firefox, Edge, Brave, Vivaldi, Chromium
